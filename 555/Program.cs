@@ -20,7 +20,7 @@ namespace ZooManagementApp
         }
 
         public abstract double Calc();
-        public abstract string Voice();
+        // Метод Voice() видалено
 
         public virtual string ToStr()
         {
@@ -38,8 +38,6 @@ namespace ZooManagementApp
         public Lion(int id, string name, double weight) : base(id, name, weight) { }
 
         public override double Calc() => Weight * 0.05;
-        public override string Voice() => "Рррр-арр!";
-
         public override string ToStr() => base.ToStr() + ",";
         public override string Info() => base.Info() + " (Лев)";
     }
@@ -54,8 +52,6 @@ namespace ZooManagementApp
         }
 
         public override double Calc() => Weight * 0.10;
-        public override string Voice() => "Ту-ру-ру!";
-
         public override string ToStr() => base.ToStr() + $",{Prop}";
         public override string Info() => base.Info() + $" (Слон) Хобот: {Prop}м";
     }
@@ -70,8 +66,6 @@ namespace ZooManagementApp
         }
 
         public override double Calc() => 0.1;
-        public override string Voice() => "Привіт!";
-
         public override string ToStr() => base.ToStr() + $",{Prop}";
         public override string Info() => base.Info() + $" (Папуга) Колір: {Prop}";
     }
@@ -86,8 +80,6 @@ namespace ZooManagementApp
         }
 
         public override double Calc() => Weight * 0.08;
-        public override string Voice() => "Хрум-хрум";
-
         public override string ToStr() => base.ToStr() + $",{Prop}";
         public override string Info() => base.Info() + $" (Жираф) Шия: {Prop}м";
     }
@@ -102,8 +94,6 @@ namespace ZooManagementApp
         }
 
         public override double Calc() => Weight * 0.15;
-        public override string Voice() => "Махаємо!";
-
         public override string ToStr() => base.ToStr() + $",{Prop}";
         public override string Info() => base.Info() + $" (Пінгвін) Звання: {Prop}";
     }
@@ -176,25 +166,17 @@ namespace ZooManagementApp
 
                     switch (type)
                     {
-                        case "Lion":
-                            obj = new Lion(id, name, w);
-                            break;
+                        case "Lion": obj = new Lion(id, name, w); break;
                         case "Elephant":
-                            double t = 0;
-                            double.TryParse(ext, out t);
+                            double.TryParse(ext, out double t);
                             obj = new Elephant(id, name, w, t);
                             break;
-                        case "Parrot":
-                            obj = new Parrot(id, name, w, ext);
-                            break;
+                        case "Parrot": obj = new Parrot(id, name, w, ext); break;
                         case "Giraffe":
-                            double n = 0;
-                            double.TryParse(ext, out n);
+                            double.TryParse(ext, out double n);
                             obj = new Giraffe(id, name, w, n);
                             break;
-                        case "Penguin":
-                            obj = new Penguin(id, name, w, ext);
-                            break;
+                        case "Penguin": obj = new Penguin(id, name, w, ext); break;
                     }
 
                     if (obj != null) list.Add(obj);
@@ -213,50 +195,27 @@ namespace ZooManagementApp
         public static void Del(int id)
         {
             List<Animal> list = Read();
-            Animal found = null;
-
-            foreach (var item in list)
-            {
-                if (item.Id == id)
-                {
-                    found = item;
-                    break;
-                }
-            }
+            Animal found = list.Find(x => x.Id == id);
 
             if (found != null)
             {
                 list.Remove(found);
-
-                List<string> text = new List<string>();
-                text.Add("Id,Type,Name,Weight,Extra");
-
-                foreach (var item in list)
-                {
-                    text.Add(item.ToStr());
-                }
-
+                List<string> text = new List<string> { "Id,Type,Name,Weight,Extra" };
+                foreach (var item in list) text.Add(item.ToStr());
                 File.WriteAllLines(f1, text, Encoding.UTF8);
                 Console.WriteLine("Видалено.");
             }
-            else
-            {
-                Console.WriteLine("Не знайдено.");
-            }
+            else Console.WriteLine("Не знайдено.");
         }
 
         public static bool CheckUser(string l, string p)
         {
             if (!File.Exists(f2)) return false;
             string[] rows = File.ReadAllLines(f2);
-
             for (int i = 1; i < rows.Length; i++)
             {
                 string[] s = rows[i].Split(',');
-                if (s.Length >= 3)
-                {
-                    if (s[1] == l && s[2] == p) return true;
-                }
+                if (s.Length >= 3 && s[1] == l && s[2] == p) return true;
             }
             return false;
         }
@@ -265,16 +224,14 @@ namespace ZooManagementApp
         {
             if (!File.Exists(f2)) return false;
             string[] rows = File.ReadAllLines(f2);
-
-            for (int i = 1; i < rows.Length; i++)
+            foreach (var r in rows)
             {
-                string[] s = rows[i].Split(',');
+                string[] s = r.Split(',');
                 if (s.Length > 1 && s[1] == l) return false;
             }
 
             int id = GetId(f2);
-            string line = $"{id},{l},{p}\n";
-            File.AppendAllText(f2, line, Encoding.UTF8);
+            File.AppendAllText(f2, $"{id},{l},{p}\n", Encoding.UTF8);
             return true;
         }
 
@@ -296,8 +253,6 @@ namespace ZooManagementApp
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            Console.Title = "Lab 5";
-
             Data.Init();
             Data.StartData();
 
@@ -314,19 +269,16 @@ namespace ZooManagementApp
                 Console.WriteLine("2. Додати");
                 Console.WriteLine("3. Видалити");
                 Console.WriteLine("4. Статистика");
-                Console.WriteLine("5. Звуки");
                 Console.WriteLine("0. Вихід");
                 Console.Write("> ");
 
                 string k = Console.ReadLine();
-
                 switch (k)
                 {
                     case "1": Table(); break;
                     case "2": Add(); break;
                     case "3": Del(); break;
                     case "4": Stat(); break;
-                    case "5": Sound(); break;
                     case "0": run = false; break;
                     default: Console.WriteLine("Error"); break;
                 }
@@ -344,26 +296,17 @@ namespace ZooManagementApp
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("1. Вхід");
-                Console.WriteLine("2. Реєстрація");
-                Console.WriteLine("0. Вихід");
+                Console.WriteLine("1. Вхід\n2. Реєстрація\n0. Вихід");
                 Console.Write("> ");
-
                 string k = Console.ReadLine();
                 if (k == "0") return false;
 
-                Console.Write("Email: ");
-                string l = Console.ReadLine();
-                Console.Write("Pass: ");
-                string p = Console.ReadLine();
+                Console.Write("Email: "); string l = Console.ReadLine();
+                Console.Write("Pass: "); string p = Console.ReadLine();
 
                 if (k == "1")
                 {
-                    if (Data.CheckUser(l, p))
-                    {
-                        Console.WriteLine("OK");
-                        return true;
-                    }
+                    if (Data.CheckUser(l, p)) return true;
                     else Console.WriteLine("No");
                 }
                 else if (k == "2")
@@ -390,87 +333,41 @@ namespace ZooManagementApp
         {
             Console.WriteLine("1-Lion, 2-Elephant, 3-Parrot, 4-Giraffe, 5-Penguin");
             string t = Console.ReadLine();
-
-            Console.Write("Name: ");
-            string n = Console.ReadLine();
-
-            Console.Write("Weight: ");
-            double w = 0;
-            double.TryParse(Console.ReadLine(), out w);
+            Console.Write("Name: "); string n = Console.ReadLine();
+            Console.Write("Weight: "); double.TryParse(Console.ReadLine(), out double w);
 
             Animal obj = null;
-
             if (t == "1") obj = new Lion(0, n, w);
-            else if (t == "2")
+            else if (t == "2" || t == "4")
             {
-                Console.Write("Prop: ");
-                double p = double.Parse(Console.ReadLine());
-                obj = new Elephant(0, n, w, p);
+                Console.Write("Prop: "); double p = double.Parse(Console.ReadLine());
+                if (t == "2") obj = new Elephant(0, n, w, p);
+                else obj = new Giraffe(0, n, w, p);
             }
-            else if (t == "3")
+            else if (t == "3" || t == "5")
             {
-                Console.Write("Prop: ");
-                obj = new Parrot(0, n, w, Console.ReadLine());
-            }
-            else if (t == "4")
-            {
-                Console.Write("Prop: ");
-                double p = double.Parse(Console.ReadLine());
-                obj = new Giraffe(0, n, w, p);
-            }
-            else if (t == "5")
-            {
-                Console.Write("Prop: ");
-                obj = new Penguin(0, n, w, Console.ReadLine());
+                Console.Write("Prop: "); string p = Console.ReadLine();
+                if (t == "3") obj = new Parrot(0, n, w, p);
+                else obj = new Penguin(0, n, w, p);
             }
 
-            if (obj != null)
-            {
-                Data.Add(obj);
-                Console.WriteLine("OK");
-            }
+            if (obj != null) Data.Add(obj);
         }
 
         static void Del()
         {
             Table();
             Console.Write("ID: ");
-            int id = 0;
-            if (int.TryParse(Console.ReadLine(), out id))
-            {
-                Data.Del(id);
-            }
+            if (int.TryParse(Console.ReadLine(), out int id)) Data.Del(id);
         }
 
         static void Stat()
         {
             List<Animal> list = Data.Read();
             if (list.Count == 0) return;
-
-            double s1 = 0;
-            double s2 = 0;
-
-            foreach (var item in list)
-            {
-                s1 += item.Calc();
-                s2 += item.Weight;
-            }
-
-            double avg = s1 / list.Count;
-
-            Console.WriteLine($"Count: {list.Count}");
-            Console.WriteLine($"Total W: {s2}");
-            Console.WriteLine($"Total F: {s1:F2}");
-            Console.WriteLine($"Avg F: {avg:F2}");
-        }
-
-        static void Sound()
-        {
-            List<Animal> list = Data.Read();
-            foreach (var item in list)
-            {
-                Console.WriteLine($"{item.Name}: {item.Voice()}");
-            }
+            double s1 = 0, s2 = 0;
+            foreach (var item in list) { s1 += item.Calc(); s2 += item.Weight; }
+            Console.WriteLine($"Count: {list.Count}\nTotal W: {s2}\nTotal F: {s1:F2}\nAvg F: {s1 / list.Count:F2}");
         }
     }
 }
